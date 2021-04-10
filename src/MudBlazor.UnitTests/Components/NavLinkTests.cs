@@ -5,11 +5,12 @@ using System;
 using System.Threading.Tasks;
 using Bunit;
 using FluentAssertions;
-using MudBlazor.UnitTests.TestComponents.NavLink;
+using Microsoft.AspNetCore.Components.Web;
+using MudBlazor.UnitTests.TestComponents;
 using NUnit.Framework;
 using static Bunit.ComponentParameterFactory;
 
-namespace MudBlazor.UnitTests
+namespace MudBlazor.UnitTests.Components
 {
     [TestFixture]
     public class NavLinkTests
@@ -43,6 +44,21 @@ namespace MudBlazor.UnitTests
             Console.WriteLine(comp.Markup);
             // select elements needed for the test
             comp.Find("a").GetAttribute("rel").Should().Be(expectedRel);
+        }
+
+        [Test]
+        public async Task NavLink_CheckOnClickEvent()
+        {
+            var clicked = false;
+            var comp = ctx.RenderComponent<MudNavLink>(new[]
+            {
+               EventCallback(nameof(MudNavLink.OnClick), (MouseEventArgs args) => { clicked = true; }),
+            });
+            // print the generated html
+            Console.WriteLine(comp.Markup);
+            comp.FindAll("a").Should().BeEmpty();
+            comp.Find(".mud-nav-link").Click();
+            clicked.Should().BeTrue();
         }
 
         [Test]

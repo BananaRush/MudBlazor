@@ -68,6 +68,7 @@ namespace MudBlazor.Docs.Services
             .AddItem("ScrollToTop", typeof(MudScrollToTop))
             .AddItem("Popover", typeof(MudPopover))
             .AddItem("SwipeArea", typeof(MudSwipeArea))
+            .AddItem("ToolBar", typeof(MudToolBar))
 
             //GROUPS
 
@@ -79,6 +80,7 @@ namespace MudBlazor.Docs.Services
                 .AddItem("Slider", typeof(MudSlider<T>))
                 .AddItem("Switch", typeof(MudSwitch<T>))
                 .AddItem("Text Field", typeof(MudTextField<T>))
+                .AddItem("Numeric Field", typeof(MudNumericField<T>))
                 .AddItem("Form", typeof(MudForm))
                 .AddItem("Autocomplete", typeof(MudAutocomplete<T>))
                 .AddItem("Field", typeof(MudField))
@@ -103,6 +105,7 @@ namespace MudBlazor.Docs.Services
                 .AddItem("Donut chart", typeof(MudChart))
                 .AddItem("Line chart", typeof(MudChart))
                 .AddItem("Pie chart", typeof(MudChart))
+                .AddItem("Bar chart", typeof(MudChart))
             );
         public IEnumerable<MudComponent> Components => _docsComponents.Elements;
 

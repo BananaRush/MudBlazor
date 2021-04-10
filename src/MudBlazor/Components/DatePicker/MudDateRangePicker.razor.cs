@@ -9,8 +9,9 @@ namespace MudBlazor
 {
     public partial class MudDateRangePicker : MudBaseDatePicker
     {
-        private DateTime? _firstDate = null;
+        private DateTime? _firstDate = null, _secondDate;
         private DateRange _dateRange;
+        private Range<string> _rangeText;
 
         protected override bool IsRange => true;
 
@@ -43,17 +44,43 @@ namespace MudBlazor
                 if (updateValue)
                 {
                     if (_dateRange == null)
+                    {
+                        _rangeText = null;
                         await SetTextAsync(null, false);
+                    }
                     else
                     {
                         if (!IsNullOrEmpty(DateFormat))
+                        {
+                            _rangeText = new Range<string>(
+                                _dateRange.Start?.ToString(DateFormat) ?? Empty,
+                                _dateRange.End?.ToString(DateFormat) ?? Empty);
                             await SetTextAsync(_dateRange.ToString(DateFormat), false);
+                        }
                         else
+                        {
+                            _rangeText = new Range<string>(
+                                _dateRange.Start?.ToIsoDateString() ?? Empty,
+                                _dateRange.End?.ToIsoDateString() ?? Empty);
                             await SetTextAsync(_dateRange.ToIsoDateString(), false);
+                        }
                     }
                 }
 
                 await DateRangeChanged.InvokeAsync(_dateRange);
+            }
+        }
+
+        private Range<string> RangeText
+        {
+            get => _rangeText;
+            set
+            {
+                if (_rangeText.Equals(value))
+                    return;
+
+                _rangeText = value;
+                SetDateRangeAsync(ParseDateRangeValue(value.Start, value.End), false).AndForget();
             }
         }
 
@@ -66,6 +93,11 @@ namespace MudBlazor
         private DateRange ParseDateRangeValue(string value)
         {
             return DateRange.TryParse(value, out var dateRange) ? dateRange : null;
+        }
+
+        private DateRange ParseDateRangeValue(string start, string end)
+        {
+            return DateRange.TryParse(start, end, out var dateRange) ? dateRange : null;
         }
 
         protected override void OnPickerClosed()
@@ -82,7 +114,8 @@ namespace MudBlazor
                 return b.AddClass("mud-hidden").Build();
             }
 
-            if (_firstDate == null && _dateRange != null && _dateRange.Start < day && _dateRange.End > day)
+            if ((_firstDate != null && _secondDate != null && _firstDate < day && _secondDate > day) ||
+                (_firstDate == null && _dateRange != null && _dateRange.Start < day && _dateRange.End > day))
             {
                 return b
                     .AddClass("mud-range")
@@ -101,12 +134,25 @@ namespace MudBlazor
                     .Build();
             }
 
-            if (_firstDate == null && _dateRange != null && _dateRange.Start != day && _dateRange.End == day)
+            if ((_firstDate != null && _secondDate != null && day == _secondDate) ||
+                (_firstDate == null && _dateRange != null && _dateRange.Start != day && _dateRange.End == day))
             {
                 return b.AddClass("mud-selected")
                     .AddClass("mud-range")
                     .AddClass("mud-range-end-selected")
                     .AddClass($"mud-theme-{Color.ToDescriptionString()}")
+                    .Build();
+            }
+
+            if (_firstDate == null && _dateRange != null && _dateRange.Start == _dateRange.End && _dateRange.Start == day)
+            {
+                return b.AddClass("mud-selected").AddClass($"mud-theme-{Color.ToDescriptionString()}").Build();
+            }
+            else if (_firstDate != null && day > _firstDate)
+            {
+                return b.AddClass("mud-range")
+                    .AddClass("mud-range-selection", _secondDate == null)
+                    .AddClass($"mud-range-selection-{Color.ToDescriptionString()}", _firstDate != null)
                     .Build();
             }
 
@@ -120,42 +166,62 @@ namespace MudBlazor
                     .Build();
             }
 
-            if (_firstDate == null && _dateRange != null && _dateRange.Start == _dateRange.End && _dateRange.Start == day)
-            {
-                return b.AddClass("mud-selected").AddClass($"mud-theme-{Color.ToDescriptionString()}").Build();
-            }
-            else if (_firstDate != null && day > _firstDate)
-            {
-                return b.AddClass("mud-range")
-                    .AddClass("mud-range-selection")
-                    .AddClass($"mud-range-selection-{Color.ToDescriptionString()}", _firstDate != null)
-                    .Build();
-            }
-
             return b.Build();
         }
 
         protected override async void OnDayClicked(DateTime dateTime)
         {
-            if (_firstDate == null || _firstDate > dateTime)
+            if (_firstDate == null || _firstDate > dateTime || _secondDate != null)
             {
+                _secondDate = null;
                 _firstDate = dateTime;
                 return;
             }
 
-            await SetDateRangeAsync(new DateRange(_firstDate, dateTime), true);
+            _secondDate = dateTime;
+            if (PickerActions == null)
+            {
+                Submit();
+
+                if (PickerVariant != PickerVariant.Static)
+                {
+                    await Task.Delay(ClosingDelay);
+                    Close(false);
+                }
+            }
+        }
+
+        protected override void OnOpened()
+        {
+            _secondDate = null;
+            base.OnOpened();
+        }
+
+        protected override async void Submit()
+        {
+            if (_firstDate == null || _secondDate == null)
+                return;
+
+            await SetDateRangeAsync(new DateRange(_firstDate, _secondDate), true);
 
             _firstDate = null;
+            _secondDate = null;
+        }
 
-            if (PickerVariant != PickerVariant.Static)
-            {
-                await Task.Delay(ClosingDelay);
-                Close();
-            }
+        public override void Clear(bool close = true)
+        {
+            DateRange = null;
+            _firstDate = _secondDate = null;
+            base.Clear();
         }
 
         protected override string GetTitleDateString()
         {
+            if (_firstDate != null && _secondDate != null)
+                return $"{_firstDate.Value.ToString("dd MMM", Culture)} - {_secondDate.Value.ToString("dd MMM", Culture)}";
+            else if (_firstDate != null)
+                return _firstDate.Value.ToString("dd MMM", Culture) + " - ";
+
             if (DateRange == null || DateRange.Start == null)
                 return "";
             if (DateRange.End == null)

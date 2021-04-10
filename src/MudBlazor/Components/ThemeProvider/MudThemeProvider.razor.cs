@@ -94,26 +94,31 @@ namespace MudBlazor
             theme.AppendLine($"--{Palette}-tertiary-lighten: {ColorRgbLighten(Theme.Palette.Tertiary)};");
             theme.AppendLine($"--{Palette}-tertiary-hover: {ColorRgba(Theme.Palette.Tertiary, Theme.Palette.HoverOpacity)};");
             theme.AppendLine($"--{Palette}-info: {Theme.Palette.Info};");
+            theme.AppendLine($"--{Palette}-info-rgb: {ColorRgbElements(Theme.Palette.Info)};");
             theme.AppendLine($"--{Palette}-info-text: {Theme.Palette.InfoContrastText};");
             theme.AppendLine($"--{Palette}-info-darken: {ColorRgbDarken(Theme.Palette.Info)};");
             theme.AppendLine($"--{Palette}-info-lighten: {ColorRgbLighten(Theme.Palette.Info)};");
             theme.AppendLine($"--{Palette}-info-hover: {ColorRgba(Theme.Palette.Info, Theme.Palette.HoverOpacity)};");
             theme.AppendLine($"--{Palette}-success: {Theme.Palette.Success};");
+            theme.AppendLine($"--{Palette}-success-rgb: {ColorRgbElements(Theme.Palette.Success)};");
             theme.AppendLine($"--{Palette}-success-text: {Theme.Palette.SuccessContrastText};");
             theme.AppendLine($"--{Palette}-success-darken: {ColorRgbDarken(Theme.Palette.Success)};");
             theme.AppendLine($"--{Palette}-success-lighten: {ColorRgbLighten(Theme.Palette.Success)};");
             theme.AppendLine($"--{Palette}-success-hover: {ColorRgba(Theme.Palette.Success, Theme.Palette.HoverOpacity)};");
             theme.AppendLine($"--{Palette}-warning: {Theme.Palette.Warning};");
+            theme.AppendLine($"--{Palette}-warning-rgb: {ColorRgbElements(Theme.Palette.Warning)};");
             theme.AppendLine($"--{Palette}-warning-text: {Theme.Palette.WarningContrastText};");
             theme.AppendLine($"--{Palette}-warning-darken: {ColorRgbDarken(Theme.Palette.Warning)};");
             theme.AppendLine($"--{Palette}-warning-lighten: {ColorRgbLighten(Theme.Palette.Warning)};");
             theme.AppendLine($"--{Palette}-warning-hover: {ColorRgba(Theme.Palette.Warning, Theme.Palette.HoverOpacity)};");
             theme.AppendLine($"--{Palette}-error: {Theme.Palette.Error};");
+            theme.AppendLine($"--{Palette}-error-rgb: {ColorRgbElements(Theme.Palette.Error)};");
             theme.AppendLine($"--{Palette}-error-text: {Theme.Palette.ErrorContrastText};");
             theme.AppendLine($"--{Palette}-error-darken: {ColorRgbDarken(Theme.Palette.Error)};");
             theme.AppendLine($"--{Palette}-error-lighten: {ColorRgbLighten(Theme.Palette.Error)};");
             theme.AppendLine($"--{Palette}-error-hover: {ColorRgba(Theme.Palette.Error, Theme.Palette.HoverOpacity)};");
             theme.AppendLine($"--{Palette}-dark: {Theme.Palette.Dark};");
+            theme.AppendLine($"--{Palette}-dark-rgb: {ColorRgbElements(Theme.Palette.Dark)};");
             theme.AppendLine($"--{Palette}-dark-text: {Theme.Palette.DarkContrastText};");
             theme.AppendLine($"--{Palette}-dark-darken: {ColorRgbDarken(Theme.Palette.Dark)};");
             theme.AppendLine($"--{Palette}-dark-lighten: {ColorRgbLighten(Theme.Palette.Dark)};");
@@ -139,6 +144,10 @@ namespace MudBlazor
 
             theme.AppendLine($"--{Palette}-lines-default: {Theme.Palette.LinesDefault};");
             theme.AppendLine($"--{Palette}-lines-inputs: {Theme.Palette.LinesInputs};");
+
+            theme.AppendLine($"--{Palette}-table-lines: {Theme.Palette.TableLines};");
+            theme.AppendLine($"--{Palette}-table-striped: {Theme.Palette.TableStriped};");
+            theme.AppendLine($"--{Palette}-table-hover: {Theme.Palette.TableHover};");
 
             theme.AppendLine($"--{Palette}-divider: {Theme.Palette.Divider};");
             theme.AppendLine($"--{Palette}-divider-light: {Theme.Palette.DividerLight};");
@@ -182,7 +191,18 @@ namespace MudBlazor
 
             //Layout Properties
             theme.AppendLine($"--{LayoutProperties}-default-borderradius: {Theme.LayoutProperties.DefaultBorderRadius};");
-            theme.AppendLine($"--{LayoutProperties}-drawer-width: {Theme.LayoutProperties.DrawerWidth};");
+#pragma warning disable CS0612 // Type or member is obsolete
+            if (!string.IsNullOrEmpty(Theme.LayoutProperties.DrawerWidth))
+            {
+                theme.AppendLine($"--{LayoutProperties}-drawer-width-left: {Theme.LayoutProperties.DrawerWidth};");
+                theme.AppendLine($"--{LayoutProperties}-drawer-width-right: {Theme.LayoutProperties.DrawerWidth};");
+            }
+#pragma warning restore CS0612 // Type or member is obsolete
+            else
+            {
+                theme.AppendLine($"--{LayoutProperties}-drawer-width-left: {Theme.LayoutProperties.DrawerWidthLeft};");
+                theme.AppendLine($"--{LayoutProperties}-drawer-width-right: {Theme.LayoutProperties.DrawerWidthRight};");
+            }
             theme.AppendLine($"--{LayoutProperties}-appbar-min-height: {Theme.LayoutProperties.AppbarMinHeight};");
 
             //Breakpoint
