@@ -6,20 +6,17 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
+using AngleSharp.Html.Dom;
 using Bunit;
 using FluentAssertions;
-using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.DependencyInjection;
-using MudBlazor.Services;
-using MudBlazor.UnitTests.Mocks;
-using MudBlazor.UnitTests.TestComponents.DatePicker;
+using MudBlazor.Extensions;
+using MudBlazor.UnitTests.TestComponents;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 using static Bunit.ComponentParameterFactory;
 
-namespace MudBlazor.UnitTests
+namespace MudBlazor.UnitTests.Components
 {
     [TestFixture]
     public class DatePickerTests
@@ -97,6 +94,21 @@ namespace MudBlazor.UnitTests
             comp.SetParam(p => p.Text, "23/10/2020");
             picker.Date.Should().Be(new DateTime(2020, 10, 23));
             comp.SetParam(p => p.Date, new DateTime(2020, 10, 26));
+            picker.Text.Should().Be("26/10/2020");
+        }
+
+        [Test]
+        public async Task DatePicker_Should_ApplyDateFormatAfterDate()
+        {
+            var comp = ctx.RenderComponent<MudDatePicker>();
+            // select elements needed for the test
+            var picker = comp.Instance;
+            picker.Text.Should().Be(null);
+            picker.Date.Should().Be(null);
+            comp.SetParam(p => p.DateFormat, "dd/MM/yyyy");
+            comp.SetParam(p => p.Culture, CultureInfo.InvariantCulture); // <-- this makes a huge difference!
+            comp.SetParam(p => p.Date, new DateTime(2020, 10, 26));
+            picker.Date.Should().Be(new DateTime(2020, 10, 26));
             picker.Text.Should().Be("26/10/2020");
         }
 
@@ -349,6 +361,20 @@ namespace MudBlazor.UnitTests
             // didn't have time to finish this test case
             // TODO: check that the days are like here https://mrmashal.github.io/angular-material-persian-datepicker/demo/demoBasicUsage/index.html
             // for 1399-11-26
+        }
+
+        [Test]
+        public void SetPickerValue_CheckText()
+        {
+            var comp = ctx.RenderComponent<MudDatePicker>(
+                Parameter(nameof(MudDatePicker.Date), DateTime.Now));
+            // select elements needed for the test
+            var picker = comp.Instance;
+
+            var text = DateTime.Now.ToIsoDateString();
+
+            picker.Text.Should().Be(text);
+            (comp.FindAll("input")[0] as IHtmlInputElement).Value.Should().Be(text);
         }
     }
 }

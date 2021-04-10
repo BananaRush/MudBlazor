@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
+using Microsoft.AspNetCore.Components.Web;
 using MudBlazor.Interfaces;
 using MudBlazor.Utilities;
 
@@ -20,6 +21,11 @@ namespace MudBlazor
           .AddClass($"mud-nav-link-disabled", Disabled)
           .Build();
 
+        protected string IconClassname =>
+        new CssBuilder("mud-nav-link-icon")
+          .AddClass($"mud-nav-link-icon-default", IconColor == Color.Default)
+          .Build();
+
         private Dictionary<string, object> Attributes
         {
             get => Disabled ? null : new Dictionary<string, object>()
@@ -36,9 +42,9 @@ namespace MudBlazor
         [Parameter] public string Icon { get; set; }
 
         /// <summary>
-        /// The color of the icon. It supports the theme colors.
+        /// The color of the icon. It supports the theme colors, default value uses the themes drawer icon color.
         /// </summary>
-        [Parameter] public Color IconColor { get; set; } = Color.Inherit;
+        [Parameter] public Color IconColor { get; set; } = Color.Default;
 
         [Parameter] public NavLinkMatch Match { get; set; } = NavLinkMatch.Prefix;
 
@@ -51,6 +57,16 @@ namespace MudBlazor
             if (!Disabled && NavigationEventReceiver != null)
             {
                 return NavigationEventReceiver.OnNavigation();
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private Task HandleClick(MouseEventArgs args)
+        {
+            if (!Disabled)
+            {
+                return OnClick.InvokeAsync(args);
             }
 
             return Task.CompletedTask;
