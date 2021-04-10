@@ -17,19 +17,22 @@ namespace MudBlazor
         private readonly List<MudTreeViewItem<T>> _childItems = new List<MudTreeViewItem<T>>();
 
         protected string Classname =>
-        new CssBuilder("mud-treeview-item")
-          .AddClass(Class)
-        .Build();
+            new CssBuilder("mud-treeview-item")
+              .AddClass(Class)
+            .Build();
 
         protected string ContentClassname =>
-        new CssBuilder("mud-treeview-item-content")
-          .AddClass("mud-treeview-item-activated", Activated && MudTreeRoot.CanActivate)
-        .Build();
+            new CssBuilder("mud-treeview-item-content")
+              .AddClass("test-tree", IsDrag)
+              .AddClass("mud-treeview-item-activated", Activated && MudTreeRoot.CanActivate)
+            .Build();
 
         public string TextClassname =>
-        new CssBuilder("mud-treeview-item-label")
-            .AddClass(TextClass)
-        .Build();
+            new CssBuilder("mud-treeview-item-label")
+                .AddClass(TextClass)
+            .Build();
+
+        public bool IsDrag { get; set; }
 
         [Parameter]
         public string Text
@@ -61,7 +64,7 @@ namespace MudBlazor
 
         [Parameter] public RenderFragment Content { get; set; }
 
-        [Parameter] public HashSet<T> Items { get; set; }
+        [Parameter] public List<T> Items { get; set; }
 
         /// <summary>
         /// Command executed when the user clicks on the CommitEdit Button.
@@ -224,7 +227,10 @@ namespace MudBlazor
             }
         }
 
-        private void AddChild(MudTreeViewItem<T> item) => _childItems.Add(item);
+        private void AddChild(MudTreeViewItem<T> item) =>
+            _childItems.Add(item);
+
+        private bool RemoveChild(MudTreeViewItem<T> item) => _childItems.Remove(item);
 
         internal IEnumerable<MudTreeViewItem<T>> GetSelectedItems()
         {
@@ -239,5 +245,70 @@ namespace MudBlazor
                 }
             }
         }
+
+        private void HandleDragStart() =>
+            MudTreeRoot.MovableElement = this;
+
+        private void HandleDragEnd() =>
+            MudTreeRoot.MovableElement = null;
+
+        private void HandleDrop()
+        {
+            IsDrag = false;
+            var elm = MudTreeRoot.MovableElement;
+            MudTreeRoot.MovableElement = null;
+
+            if (elm != null)
+            {
+                if (elm.Parent != null)
+                {
+                    elm.RemoveItemChild(elm);
+                    elm.Parent = null;
+                }
+                else
+                {
+                    MudTreeRoot.RemoveItemChild(elm);
+                    MudTreeRoot.Update();
+                }
+
+                if (HasChild)
+                {
+                    AddItemChild(elm);
+                    elm.Parent = this;
+                }
+                else
+                {
+                    if (Parent != null)
+                    {
+                        int ind = Parent.Items.IndexOf(Value) + 1;
+                        Parent.AddItemChild(ind, elm);
+                        elm.Parent = Parent;
+                    }
+                    else
+                    {
+                        int ind = MudTreeRoot.Items.IndexOf(Value) + 1;
+                        MudTreeRoot.AddItemChild(ind, elm);
+                    }
+                }
+            }
+        }
+
+        private void AddItemChild(MudTreeViewItem<T> item) =>
+            Items.Add(item.Value);
+
+        private void AddItemChild(int index, MudTreeViewItem<T> item) =>
+            Items.Insert(index, item.Value);
+
+        private bool RemoveItemChild(MudTreeViewItem<T> item) =>
+            Items.Remove(item.Value);
+
+        // Когда попадает в зону
+        private void HandleDragEnter() =>
+            IsDrag = true;
+
+        private void HandleDragLeave() =>
+            IsDrag = false;
+
+        private void Update() => StateHasChanged();
     }
 }

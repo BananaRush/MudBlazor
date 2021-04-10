@@ -3,7 +3,14 @@
 @typeparam T
 
 <li @attributes="UserAttributes" class="@Classname" style="@Style">
-    <div class="@ContentClassname" @onclick="OnItemClicked" @onclick:stopPropagation="true">
+    <div class="@ContentClassname" @onclick="OnItemClicked" @onclick:stopPropagation="true"
+        @ondragover="HandleDragEnter" 
+        @ondragover:preventDefault
+        @ondrop="HandleDrop"
+        @ondragleave="HandleDragLeave" 
+        @ondragstart="HandleDragStart"
+        @ondragend="HandleDragEnd">
+
         @if (Content != null)
         {
             @Content
@@ -24,7 +31,7 @@
                 </div>
             }
             
-            <MudText Typo="@TextTypo" Class="@TextClassname">
+            <MudText Typo="@TextTypo" Class="@TextClassname" draggable="true">
                 @Text
             </MudText>  
 

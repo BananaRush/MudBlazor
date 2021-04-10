@@ -1,0 +1,113 @@
+﻿@inherits LayoutComponentBase
+
+<MudTreeView 
+    Style="width: 500px;" 
+    CanActivate="true" 
+    Items="TreeItems" 
+    CanSelect="true" 
+    @bind-ActivatedValue="ActivatedValue" 
+    @bind-SelectedValues="SelectedValues">
+    <ItemTemplate>
+        <MudTreeViewItem 
+            @bind-Expanded="@context.IsExpanded" 
+            Items="@context.TreeItems"
+            Value="@context"
+            Icon="@context.Icon" 
+            Text="@context.Title" 
+            EndText="@context.Number?.ToString()"
+            EndTextTypo="@Typo.caption" />
+    </ItemTemplate>
+</MudTreeView>
+
+<div style="width: 100%">
+    <MudText Typo="@Typo.subtitle1">Activated item: @(ActivatedValue?.Title)</MudText>
+    <MudText Typo="@Typo.subtitle1">Sum of selected items: @GetSelectedSum()</MudText>
+</div>
+
+<button @onclick="Click">123</button>
+@code {
+    class TreeItemData
+    {
+        public string Title { get; set; }
+
+        public string Icon { get; set; }
+
+        public int? Number { get; set; }
+
+        public bool IsExpanded { get; set; }
+
+        public List<TreeItemData> TreeItems { get; set; }
+
+        public TreeItemData(string title, string icon, int? number = null)
+        {
+            Title = title;
+            Icon = icon;
+            Number = number;
+            TreeItems = new List<TreeItemData>();
+        }
+    }
+
+    TreeItemData ActivatedValue { get; set; }
+
+    HashSet<TreeItemData> SelectedValues { get; set; }
+
+    List<TreeItemData> TreeItems { get; set; } = new List<TreeItemData>();
+
+    private void Click()
+    {
+        PrintTree(TreeItems, 0);
+    }
+
+    public MainLayout()
+    {
+        TreeItems.Add(new TreeItemData("1", Icons.Filled.Email));
+        TreeItems.Add(new TreeItemData("2", Icons.Filled.Delete));
+        TreeItems.Add(new TreeItemData("3", Icons.Filled.Label)
+        {
+            IsExpanded = true,
+            TreeItems = new List<TreeItemData>()
+            {
+                new TreeItemData("4", Icons.Filled.Group, 90),
+                new TreeItemData("5", Icons.Filled.Info, 2294),
+                new TreeItemData("6", Icons.Filled.QuestionAnswer, 3566),
+                new TreeItemData("7", Icons.Filled.LocalOffer, 733)
+                {
+                    IsExpanded = true,
+                    TreeItems = new List<TreeItemData>()
+                    {
+                        new TreeItemData("8", Icons.Filled.Group, 90),
+                        new TreeItemData("9", Icons.Filled.Info, 2294),
+                        new TreeItemData("10", Icons.Filled.QuestionAnswer, 3566),
+                        new TreeItemData("11", Icons.Filled.LocalOffer, 733)
+                        {
+
+                        }
+                    }
+                }
+            }
+        });
+        TreeItems.Add(new TreeItemData("12", Icons.Filled.Label));
+    }
+
+    private void PrintTree(List<TreeItemData> treeItems, int index)
+    {
+        int ind = index + 1;
+        foreach (var item in treeItems)
+        {
+
+            string txt = string.Empty;
+            for (int i = 0; i < ind; i++)
+                txt += "-";
+
+            txt += $" {item.Title}";
+            System.Diagnostics.Debug.WriteLine(txt);
+            if (item.TreeItems.Any())
+                PrintTree(item.TreeItems, ind);
+        }
+    }
+
+    public int GetSelectedSum()
+    {
+        return SelectedValues?.Sum(i => i.Number ?? 0) ?? 0;
+    }
+}

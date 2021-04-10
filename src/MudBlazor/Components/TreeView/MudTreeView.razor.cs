@@ -20,6 +20,7 @@ namespace MudBlazor
           .AddClass("mud-treeview-expand-on-click", ExpandOnClick)
           .AddClass(Class)
         .Build();
+
         protected string Stylename =>
         new StyleBuilder()
             .AddStyle($"width", Width, !string.IsNullOrWhiteSpace(Width))
@@ -62,7 +63,7 @@ namespace MudBlazor
         [Parameter]
         public string Width { get; set; }
 
-        [Parameter] public HashSet<T> Items { get; set; }
+        [Parameter] public List<T> Items { get; set; }
 
         [Parameter] public EventCallback<T> ActivatedValueChanged { get; set; }
 
@@ -79,6 +80,11 @@ namespace MudBlazor
         [Parameter] public RenderFragment<T> ItemTemplate { get; set; }
 
         [CascadingParameter] MudTreeView<T> MudTreeRoot { get; set; }
+
+        /// <summary>
+        /// эЛемент который сейча перемещят
+        /// </summary>
+        internal MudTreeViewItem<T> MovableElement;
 
         public MudTreeView()
         {
@@ -137,5 +143,13 @@ namespace MudBlazor
         }
 
         internal void AddChild(MudTreeViewItem<T> item) => _childItems.Add(item);
+
+        internal bool RemoveItemChild(MudTreeViewItem<T> item) =>
+            Items.Remove(item.Value);
+
+        internal void AddItemChild(int index, MudTreeViewItem<T> item) =>
+            Items.Insert(index, item.Value);
+
+        internal void Update() => StateHasChanged();
     }
 }
